@@ -1,0 +1,25 @@
+{
+  "name": "samba-client",
+  "version": "1.0.0",
+  "description": "wrapper for smbclient",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eflexsystems/node-samba-client.git"
+  },
+  "keywords": [
+    "samba",
+    "smb",
+    "cifs",
+    "smbclient"
+  ],
+  "author": "eFlex Systems",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eflexsystems/node-samba-client/issues"
+  },
+  "homepage": "https://github.com/eflexsystems/node-samba-client"
+}

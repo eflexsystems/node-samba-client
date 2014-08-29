@@ -15,15 +15,14 @@ SambaClient.prototype.getFile = function(path, destination, cb) {
 };
 
 SambaClient.prototype.sendFile = function(path, destination, cb) {
-  this.runCommand('put', path, destination, cb);
+  this.runCommand('put', path, destination.replace('/', '\\'), cb);
 };
 
 SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
   var passwordFlag = this.password ? this.password : '-N';
   var workingDir   = p.dirname(path);
   var fileName     = p.basename(path).replace('/', '\\');
-  var escapedDest  = destination.replace('/', '\\');
-  var fullCmd      = util.format('%s %s %s', cmd, fileName, escapedDest);
+  var fullCmd      = util.format('%s %s %s', cmd, fileName, destination);
 
   var args = ['-U', this.username, passwordFlag, '-c', fullCmd, this.address];
 

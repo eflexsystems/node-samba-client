@@ -32,11 +32,11 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
 
   execFile('smbclient', args, options, function(err, stdout, stderr) {
     // Samba is crazy and writes to standard error when the command is successful
-    var allOutput = stdout + stderr;
+    var allOutput = (stdout + stderr).toLowerCase();
 
     if (err) {
       cb(err);
-    } else if (allOutput.indexOf('error') > -1 || allOutput.indexOf('fail') > -1) {
+    } else if (allOutput.indexOf('error') > -1 || allOutput.indexOf('fail') > -1 || allOutput.indexOf('not enough') > -1) {
       cb(new Error('Samba Error - ' + allOutput));
     } else {
       cb(null, allOutput);

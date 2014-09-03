@@ -31,7 +31,7 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
   };
 
   execFile('smbclient', args, options, function(err, stdout, stderr) {
-    var allOutput = (stdout + stderr).toLowerCase();
+    var allOutput = (stdout + stderr);
     cb(err, allOutput);
   });
 };

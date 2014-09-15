@@ -19,12 +19,21 @@ SambaClient.prototype.sendFile = function(path, destination, cb) {
 };
 
 SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
-  var passwordFlag = this.password ? this.password : '-N';
   var workingDir   = p.dirname(path);
   var fileName     = p.basename(path).replace('/', '\\');
   var fullCmd      = util.format('%s %s %s', cmd, fileName, destination);
 
-  var args = ['-U', this.username, passwordFlag, '-c', fullCmd, this.address];
+  var args = ['-U', this.username];
+
+  if (!this.password) {
+    args.push('-N');
+  }
+
+  args.push('-c', fullCmd, this.address);
+
+  if (this.password) {
+    args.push(this.password);
+  }
 
   var options = {
     cwd: workingDir

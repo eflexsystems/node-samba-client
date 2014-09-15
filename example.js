@@ -8,7 +8,8 @@ var testFile = 'test.txt';
 fs.writeFileSync(testFile, testFile);
 
 var client = new SambaClient({
-  address: process.argv[2]
+  address: process.argv[2],
+  username: 'Guest'
 });
 
 client.sendFile(testFile, testFile, function(err) {

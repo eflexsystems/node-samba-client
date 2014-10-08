@@ -4,6 +4,12 @@ var execFile = require('child_process').execFile;
 var util     = require('util');
 var p        = require('path');
 
+/*
+ * NT_STATUS_NO_SUCH_FILE - when trying to dir a file in a directory that *does* exist
+ * NT_STATUS_OBJECT_NAME_NOT_FOUND - when trying to dir a file in a directory that *does not* exist
+ */
+var missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
+
 function SambaClient(options) {
   this.address  = options.address;
   this.username = options.username || 'guest';
@@ -29,10 +35,10 @@ SambaClient.prototype.dir = function(remotePath, cb) {
 SambaClient.prototype.fileExists = function(remotePath, cb) {
   this.dir(remotePath, function(err, allOutput) {
 
-    if (err && allOutput.match(/NT_STATUS_NO_SUCH_FILE/im)) {
+    if (err && allOutput.match(missingFileRegex)) {
       return cb(null, false);
     } else if (err) {
-      return cb(err);
+      return cb(err, allOutput);
     }
 
     cb(null, true);

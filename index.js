@@ -23,6 +23,7 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
   var fileName     = p.basename(path).replace('/', '\\');
   var fullCmd      = util.format('%s %s %s', cmd, fileName, destination);
 
+SambaClient.prototype.getSmbClientArgs = function(fullCmd) {
   var args = ['-U', this.username];
 
   if (!this.password) {
@@ -35,14 +36,30 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
     args.push(this.password);
   }
 
+  return args;
+};
+
+SambaClient.prototype.execute = function(cmd, cmdArgs, workingDir, cb) {
+  var fullCmd = util.format('%s %s', cmd, cmdArgs);
+
+  var args = this.getSmbClientArgs(fullCmd);
+
   var options = {
-    cwd: workingDir
+    cwd : workingDir
   };
 
   execFile('smbclient', args, options, function(err, stdout, stderr) {
     var allOutput = (stdout + stderr);
     cb(err, allOutput);
   });
+};
+
+SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
+  var workingDir   = p.dirname(path);
+  var fileName     = p.basename(path).replace('/', '\\');
+  var cmdArgs      = util.format('%s %s', fileName, destination);
+
+  this.execute(cmd, cmdArgs, workingDir, cb);
 };
 
 module.exports = SambaClient;

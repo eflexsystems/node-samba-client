@@ -1,8 +1,8 @@
 'use strict';
 
-var execFile = require('child_process').execFile;
-var util     = require('util');
-var p        = require('path');
+var exec = require('child_process').exec;
+var util = require('util');
+var p    = require('path');
 
 /*
  * NT_STATUS_NO_SUCH_FILE - when trying to dir a file in a directory that *does* exist
@@ -64,13 +64,13 @@ SambaClient.prototype.getSmbClientArgs = function(fullCmd) {
 SambaClient.prototype.execute = function(cmd, cmdArgs, workingDir, cb) {
   var fullCmd = wrap(util.format('%s %s', cmd, cmdArgs));
 
-  var args = this.getSmbClientArgs(fullCmd);
+  var command = ['smbclient', this.getSmbClientArgs(fullCmd)].join(' ');
 
   var options = {
     cwd : workingDir
   };
 
-  execFile('smbclient', args, options, function(err, stdout, stderr) {
+  exec(command, options, function(err, stdout, stderr) {
     var allOutput = (stdout + stderr);
     cb(err, allOutput);
   });

@@ -12,8 +12,8 @@ var missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)
 
 function SambaClient(options) {
   this.address  = options.address;
-  this.username = options.username || 'guest';
-  this.password = options.password;
+  this.username = wrap(options.username || 'guest');
+  this.password = wrap(options.password);
 }
 
 SambaClient.prototype.getFile = function(path, destination, cb) {
@@ -62,7 +62,7 @@ SambaClient.prototype.getSmbClientArgs = function(fullCmd) {
 };
 
 SambaClient.prototype.execute = function(cmd, cmdArgs, workingDir, cb) {
-  var fullCmd = util.format('%s %s', cmd, cmdArgs);
+  var fullCmd = wrap(util.format('%s %s', cmd, cmdArgs));
 
   var args = this.getSmbClientArgs(fullCmd);
 
@@ -85,3 +85,7 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
 };
 
 module.exports = SambaClient;
+
+function wrap(str) {
+  return '\'' + str + '\'';
+}

@@ -64,7 +64,7 @@ SambaClient.prototype.getSmbClientArgs = function(fullCmd) {
 SambaClient.prototype.execute = function(cmd, cmdArgs, workingDir, cb) {
   var fullCmd = wrap(util.format('%s %s', cmd, cmdArgs));
 
-  var command = ['smbclient', this.getSmbClientArgs(fullCmd)].join(' ');
+  var command = ['smbclient', this.getSmbClientArgs(fullCmd).join(' ')].join(' ');
 
   var options = {
     cwd : workingDir

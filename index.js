@@ -4,6 +4,7 @@ var exec = require('child_process').exec;
 var util = require('util');
 var p    = require('path');
 
+var singleSlash = /\//g;
 /*
  * NT_STATUS_NO_SUCH_FILE - when trying to dir a file in a directory that *does* exist
  * NT_STATUS_OBJECT_NAME_NOT_FOUND - when trying to dir a file in a directory that *does not* exist
@@ -21,15 +22,15 @@ SambaClient.prototype.getFile = function(path, destination, cb) {
 };
 
 SambaClient.prototype.sendFile = function(path, destination, cb) {
-  this.runCommand('put', path, destination.replace('/', '\\'), cb);
+  this.runCommand('put', path, destination.replace(singleSlash, '\\'), cb);
 };
 
 SambaClient.prototype.mkdir = function(remotePath, cb) {
-  this.execute('mkdir', remotePath.replace('/', '\\'), __dirname, cb);
+  this.execute('mkdir', remotePath.replace(singleSlash, '\\'), __dirname, cb);
 };
 
 SambaClient.prototype.dir = function(remotePath, cb) {
-  this.execute('dir', remotePath.replace('/', '\\'), __dirname, cb);
+  this.execute('dir', remotePath.replace(singleSlash, '\\'), __dirname, cb);
 };
 
 SambaClient.prototype.fileExists = function(remotePath, cb) {
@@ -78,7 +79,7 @@ SambaClient.prototype.execute = function(cmd, cmdArgs, workingDir, cb) {
 
 SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
   var workingDir   = p.dirname(path);
-  var fileName     = p.basename(path).replace('/', '\\');
+  var fileName     = p.basename(path).replace(singleSlash, '\\');
   var cmdArgs      = util.format('%s %s', fileName, destination);
 
   this.execute(cmd, cmdArgs, workingDir, cb);

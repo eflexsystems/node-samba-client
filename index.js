@@ -13,7 +13,7 @@ var missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)
 function SambaClient(options) {
   this.address  = options.address;
   this.username = wrap(options.username || 'guest');
-  this.password = wrap(options.password);
+  this.password = options.password ? wrap(options.password) : undefined;
 }
 
 SambaClient.prototype.getFile = function(path, destination, cb) {

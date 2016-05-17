@@ -20,6 +20,17 @@ client.mkdir('test-directory', function(err) {
   console.log('created test directory on samba share at ' + client.address);
 });
 
+
+client.listFiles('eflex', '.txt', function(err, list) {
+  if (err) {
+    return console.error(err);
+  }
+
+  console.log('found these files: ' + list);
+});
+
+client.mkdir('test-directory', function(err) {if (err) {return console.error(err);}console.log('created test directory on samba share at ' + client.address);});
+
 client.sendFile(testFile, testFile, function(err) {
   if (err) {
     return console.error(err);

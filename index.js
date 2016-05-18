@@ -25,21 +25,21 @@ SambaClient.prototype.sendFile = function(path, destination, cb) {
   this.runCommand('put', path, destination.replace(singleSlash, '\\'), cb);
 };
 
-SambaClient.prototype.deleteFile = function(path, cb) {
-  this.runCommand('del', path, cb);
+SambaClient.prototype.deleteFile = function(fileName, cb) {
+  this.execute('del', fileName, '', cb);
 };
 
 SambaClient.prototype.listFiles = function(fileNamePrefix, fileNameSuffix, cb) {
-
   var cmdArgs      = util.format('%s*%s', fileNamePrefix, fileNameSuffix);
-
   this.execute('dir', cmdArgs, '', function(err, allOutput) {
     var fileList = [];
 
-    checkForErrors(err, allOutput, [], cb);
-
+    if (err && allOutput.match(missingFileRegex)) {
+      return cb(null, []);
+    } else if (err) {
+      return cb(err, allOutput);
+    }
     var lines = allOutput.split('\n');
-
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i].toString().trim();
       if (line.startsWith(fileNamePrefix)) {
@@ -62,7 +62,11 @@ SambaClient.prototype.dir = function(remotePath, cb) {
 SambaClient.prototype.fileExists = function(remotePath, cb) {
   this.dir(remotePath, function(err, allOutput) {
 
-    checkForErrors(err, allOutput, false, cb);
+    if (err && allOutput.match(missingFileRegex)) {
+      return cb(null, false);
+    } else if (err) {
+      return cb(err, allOutput);
+    }
     cb(null, true);
   });
 };
@@ -110,12 +114,4 @@ module.exports = SambaClient;
 
 function wrap(str) {
   return '\'' + str + '\'';
-}
-
-function checkForErrors(err, allOutput, defaultVal, cb) {
-  if (err && allOutput.match(missingFileRegex)) {
-    return cb(null, defaultVal);
-  } else if (err) {
-    return cb(err, allOutput);
-  }
 }

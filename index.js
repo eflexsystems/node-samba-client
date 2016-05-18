@@ -25,6 +25,32 @@ SambaClient.prototype.sendFile = function(path, destination, cb) {
   this.runCommand('put', path, destination.replace(singleSlash, '\\'), cb);
 };
 
+SambaClient.prototype.deleteFile = function(fileName, cb) {
+  this.execute('del', fileName, '', cb);
+};
+
+SambaClient.prototype.listFiles = function(fileNamePrefix, fileNameSuffix, cb) {
+  var cmdArgs      = util.format('%s*%s', fileNamePrefix, fileNameSuffix);
+  this.execute('dir', cmdArgs, '', function(err, allOutput) {
+    var fileList = [];
+
+    if (err && allOutput.match(missingFileRegex)) {
+      return cb(null, []);
+    } else if (err) {
+      return cb(err, allOutput);
+    }
+    var lines = allOutput.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].toString().trim();
+      if (line.startsWith(fileNamePrefix)) {
+        var parsed = line.substring(0, line.indexOf(fileNameSuffix) + fileNameSuffix.length);
+        fileList.push(parsed);
+      }
+    }
+    cb(null, fileList);
+	});
+};
+
 SambaClient.prototype.mkdir = function(remotePath, cb) {
   this.execute('mkdir', remotePath.replace(singleSlash, '\\'), __dirname, cb);
 };
@@ -41,7 +67,6 @@ SambaClient.prototype.fileExists = function(remotePath, cb) {
     } else if (err) {
       return cb(err, allOutput);
     }
-
     cb(null, true);
   });
 };

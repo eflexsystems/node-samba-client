@@ -119,5 +119,5 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
 module.exports = SambaClient;
 
 function wrap(str) {
-  return '\'' + str + '\'';
+  return '"' + str + '"';
 }

@@ -1,3 +1,4 @@
+/* jshint node: true */
 'use strict';
 
 var exec = require('child_process').exec;
@@ -13,6 +14,7 @@ var missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)
 
 function SambaClient(options) {
   this.address  = options.address;
+  this.domain = options.domain ? wrap(options.domain) : undefined;
   this.username = wrap(options.username || 'guest');
   this.password = options.password ? wrap(options.password) : undefined;
 }
@@ -73,6 +75,10 @@ SambaClient.prototype.fileExists = function(remotePath, cb) {
 
 SambaClient.prototype.getSmbClientArgs = function(fullCmd) {
   var args = ['-U', this.username];
+
+  if (this.domain) {
+    args.push('-W', this.domain);
+  }
 
   if (!this.password) {
     args.push('-N');

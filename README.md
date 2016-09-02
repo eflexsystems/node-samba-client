@@ -17,6 +17,7 @@ API
 	  address: '//server/folder', // required
 	  username: 'test', // not required, defaults to guest
 	  password: 'test', // not required
+	  domain: 'WORKGROUP' // not required
 	});
 
 	// send a file

@@ -103,6 +103,9 @@ SambaClient.prototype.execute = function(cmd, cmdArgs, workingDir, cb) {
   };
 
   exec(command, options, function(err, stdout, stderr) {
+    if(err !== null) {
+      err.message += stdout;
+    }
     var allOutput = (stdout + stderr);
     cb(err, allOutput);
   });

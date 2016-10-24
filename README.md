@@ -6,7 +6,7 @@ Node.js wrapper for smbclient
 
 Requirements
 ------------
-Smbclient must be installed. This can be installed on OSX with `brew install samba` and on Ubuntu with `sudo apt-get install smbclient`.
+Smbclient must be installed. This can be installed on OSX with `brew install homebrew/boneyard/samba` and on Ubuntu with `sudo apt-get install smbclient`.
 
 API
 -------------

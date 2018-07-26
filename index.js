@@ -119,6 +119,27 @@ SambaClient.prototype.runCommand = function(cmd, path, destination, cb) {
   this.execute(cmd, cmdArgs, workingDir, cb);
 };
 
+SambaClient.prototype.getAllShares = function(cb) {
+  exec('smbtree -U guest -N', {}, function(err, stdout, stderr) {
+    var allOutput = (stdout + stderr);
+    if (err !== null) {
+      err.message += allOutput;
+      cb(err, null);
+      return;
+    }
+
+    var shares = [];
+    for (var line in stdout.split(/\r?\n/)) {
+      words = line.split(/\t/);
+      if (words.length > 2 && words[2].match(/^\s*$/) !== null) {
+        shares.append(words[2].trim());
+      }
+    }
+
+    cb(null, shares);
+  });
+}
+
 module.exports = SambaClient;
 
 function wrap(str) {

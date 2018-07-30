@@ -130,7 +130,7 @@ SambaClient.prototype.getAllShares = function(cb) {
 
     var shares = [];
     for (var line in stdout.split(/\r?\n/)) {
-      words = line.split(/\t/);
+      var words = line.split(/\t/);
       if (words.length > 2 && words[2].match(/^\s*$/) !== null) {
         shares.append(words[2].trim());
       }
@@ -138,7 +138,7 @@ SambaClient.prototype.getAllShares = function(cb) {
 
     cb(null, shares);
   });
-}
+};
 
 module.exports = SambaClient;
 

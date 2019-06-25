@@ -16,6 +16,7 @@ function SambaClient(options) {
   this.username = wrap(options.username || 'guest');
   this.password = options.password ? wrap(options.password) : undefined;
   this.domain = options.domain;
+  this.port = options.port;
 }
 
 SambaClient.prototype.getFile = function(path, destination, cb) {
@@ -88,6 +89,11 @@ SambaClient.prototype.getSmbClientArgs = function(fullCmd) {
   if (this.domain) {
     args.push('-W');
     args.push(this.domain);
+  }
+
+  if (this.port) {
+    args.push('-p');
+    args.push(this.port);
   }
 
   return args;

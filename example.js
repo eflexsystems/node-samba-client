@@ -1,66 +1,45 @@
 'use strict';
 
-var fs          = require('fs');
-var SambaClient = require('./');
+const fs          = require('fs').promises;
+const SambaClient = require('./');
 
-var testFile = 'test.txt';
+const testFile = 'test.txt';
 
-fs.writeFileSync(testFile, testFile);
-
-var client = new SambaClient({
+let client = new SambaClient({
   address: process.argv[2],
   username: 'Guest'
 });
 
-client.mkdir('test-directory', function(err) {
-  if (err) {
-    return console.error(err);
+async function run() {
+  await fs.writeFile(testFile, testFile);
+
+  await client.mkdir('test-directory');
+  console.log(`created test directory on samba share at ${client.address}`);
+
+  let list = await client.listFiles('eflex', '.txt');
+  console.log(`found these files: ${list}`);
+
+  await client.mkdir('test-directory');
+  console.log(`created test directory on samba share at ${client.address}`);
+
+  await client.sendFile(testFile, testFile);
+  console.log(`sent test file to samba share at ${client.address}`);
+
+  await fs.unlink(testFile);
+
+  await client.getFile(testFile, testFile);
+  console.log(`got test file from samba share at ${client.address}`);
+
+  let exists = await client.fileExists(testFile);
+  if (exists) {
+    console.log(`test file exists on samba share at ${client.address}`);
+  } else {
+    console.log(`test file does not exist on samba share at ${client.address}`);
   }
-
-  console.log('created test directory on samba share at ' + client.address);
-});
-
-
-client.listFiles('eflex', '.txt', function(err, list) {
-  if (err) {
-    return console.error(err);
-  }
-
-  console.log('found these files: ' + list);
-});
-
-client.mkdir('test-directory', function(err) {if (err) {return console.error(err);}console.log('created test directory on samba share at ' + client.address);});
-
-client.sendFile(testFile, testFile, function(err) {
-  if (err) {
-    return console.error(err);
-  }
-
-  console.log('sent test file to samba share at ' + client.address);
-
-  fs.unlinkSync(testFile);
-
-  client.getFile(testFile, testFile, function(err) {
-    if (err) {
-      return console.error(err);
-    }
-
-    console.log('got test file from samba share at ' + client.address);
-  });
-
-  client.fileExists(testFile, function(err, exists) {
-    if (err) {
-      return console.error(err);
-    }
-
-    if (exists) {
-      console.log('test file exists on samba share at ' + client.address);
-    } else {
-      console.log('test file does not exist on samba share at ' + client.address);
-    }
-  });
-});
+}
 
 process.on('exit', function() {
   fs.unlinkSync(testFile);
 });
+
+run();

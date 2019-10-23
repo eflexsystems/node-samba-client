@@ -23,29 +23,23 @@ class SambaClient {
     this.domain = options.domain;
   }
 
-  getFile(path, destination, cb) {
-    this.runCommand('get', path, destination, cb);
+  getFile(path, destination) {
+    return this.runCommand('get', path, destination);
   }
 
-  sendFile(path, destination, cb) {
-    this.runCommand('put', path, destination.replace(singleSlash, '\\'), cb);
+  sendFile(path, destination) {
+    return this.runCommand('put', path, destination.replace(singleSlash, '\\'));
   }
 
-  deleteFile(fileName, cb) {
-    this.execute('del', fileName, '', cb);
+  deleteFile(fileName) {
+    return this.execute('del', fileName, '');
   }
 
-  listFiles(fileNamePrefix, fileNameSuffix, cb) {
-    let cmdArgs = util.format('%s*%s', fileNamePrefix, fileNameSuffix);
-    this.execute('dir', cmdArgs, '', function(err, allOutput) {
+  async listFiles(fileNamePrefix, fileNameSuffix) {
+    try {
+      let cmdArgs = util.format('%s*%s', fileNamePrefix, fileNameSuffix);
+      let allOutput = await this.execute('dir', cmdArgs, '');
       let fileList = [];
-
-      if (err && allOutput.match(missingFileRegex)) {
-        return cb(null, []);
-      } else if (err) {
-        return cb(err, allOutput);
-      }
-
       let lines = allOutput.split('\n');
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i].toString().trim();
@@ -54,28 +48,35 @@ class SambaClient {
           fileList.push(parsed);
         }
       }
-      cb(null, fileList);
-    });
-  }
-
-  mkdir(remotePath, cb) {
-    this.execute('mkdir', remotePath.replace(singleSlash, '\\'), __dirname, cb);
-  }
-
-  dir(remotePath, cb) {
-    this.execute('dir', remotePath.replace(singleSlash, '\\'), __dirname, cb);
-  }
-
-  fileExists(remotePath, cb) {
-    this.dir(remotePath, function(err, allOutput) {
-
-      if (err && allOutput.match(missingFileRegex)) {
-        return cb(null, false);
-      } else if (err) {
-        return cb(err, allOutput);
+      return fileList;
+    } catch(e) {
+      if (e.message.match(missingFileRegex)) {
+        return [];
+      } else {
+        throw e;
       }
-      cb(null, true);
-    });
+    }
+  }
+
+  mkdir(remotePath) {
+    return this.execute('mkdir', remotePath.replace(singleSlash, '\\'), __dirname);
+  }
+
+  dir(remotePath) {
+    return this.execute('dir', remotePath.replace(singleSlash, '\\'), __dirname);
+  }
+
+  async fileExists(remotePath) {
+    try {
+      await this.dir(remotePath);
+      return true;
+    } catch(e) {
+      if (e.message.match(missingFileRegex)) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
   }
 
   getSmbClientArgs(fullCmd) {
@@ -99,50 +100,56 @@ class SambaClient {
     return args;
   }
 
-  execute(cmd, cmdArgs, workingDir, cb) {
+  execute(cmd, cmdArgs, workingDir) {
     let fullCmd = wrap(util.format('%s %s', cmd, cmdArgs));
-
     let command = ['smbclient', this.getSmbClientArgs(fullCmd).join(' ')].join(' ');
 
     let options = {
-      cwd : workingDir
+      cwd: workingDir
     };
 
-    exec(command, options, function(err, stdout, stderr) {
-      let allOutput = (stdout + stderr);
-      if(err !== null) {
-        err.message += allOutput;
-      }
-      cb(err, allOutput);
+    return new Promise((resolve, reject) => {
+      exec(command, options, function(err, stdout, stderr) {
+        let allOutput = stdout + stderr;
+
+        if (err) {
+          err.message += allOutput;
+          return reject(err);
+        }
+
+        return resolve(allOutput);
+      });
     });
   }
 
-  runCommand(cmd, path, destination, cb) {
-    let workingDir   = p.dirname(path);
-    let fileName     = p.basename(path).replace(singleSlash, '\\');
-    let cmdArgs      = util.format('%s %s', fileName, destination);
+  runCommand(cmd, path, destination) {
+    let workingDir = p.dirname(path);
+    let fileName = p.basename(path).replace(singleSlash, '\\');
+    let cmdArgs = util.format('%s %s', fileName, destination);
 
-    this.execute(cmd, cmdArgs, workingDir, cb);
+    return this.execute(cmd, cmdArgs, workingDir);
   }
 
-  getAllShares(cb) {
-    exec('smbtree -U guest -N', {}, function(err, stdout, stderr) {
-      let allOutput = (stdout + stderr);
-      if (err !== null) {
-        err.message += allOutput;
-        cb(err, null);
-        return;
-      }
+  getAllShares() {
+    return new Promise((resolve, reject) => {
+      exec('smbtree -U guest -N', {}, function(err, stdout, stderr) {
+        let allOutput = stdout + stderr;
 
-      let shares = [];
-      for (let line in stdout.split(/\r?\n/)) {
-        let words = line.split(/\t/);
-        if (words.length > 2 && words[2].match(/^\s*$/) !== null) {
-          shares.append(words[2].trim());
+        if (err !== null) {
+          err.message += allOutput;
+          return reject(err);
         }
-      }
 
-      cb(null, shares);
+        let shares = [];
+        for (let line in stdout.split(/\r?\n/)) {
+          let words = line.split(/\t/);
+          if (words.length > 2 && words[2].match(/^\s*$/) !== null) {
+            shares.append(words[2].trim());
+          }
+        }
+
+        return resolve(shares);
+      });
     });
   }
 }

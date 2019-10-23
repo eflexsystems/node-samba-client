@@ -6,14 +6,15 @@ Node.js wrapper for smbclient
 
 Requirements
 ------------
+Requires Node.js 10+
 Smbclient must be installed. This can be installed on Ubuntu with `sudo apt-get install smbclient`.
 
 API
 -------------
 
-	var SambaClient = require('samba-client');
+	const SambaClient = require('samba-client');
 
-	var client = new SambaClient({
+	let client = new SambaClient({
 	  address: '//server/folder', // required
 	  username: 'test', // not required, defaults to guest
 	  password: 'test', // not required
@@ -21,7 +22,7 @@ API
 	});
 
 	// send a file
-	client.sendFile('somePath/file', 'destinationFolder/name', function(err) {});
+	await client.sendFile('somePath/file', 'destinationFolder/name');
 
 	// get a file
-	client.getFile('someRemotePath/file', 'destinationFolder/name', function(err) {})
+	await client.getFile('someRemotePath/file', 'destinationFolder/name');

@@ -59,11 +59,11 @@ class SambaClient {
   }
 
   mkdir(remotePath) {
-    return this.execute('mkdir', remotePath.replace(singleSlash, '\\'), __dirname);
+    return this.execute('mkdir', remotePath.replace(singleSlash, '\\'), '');
   }
 
   dir(remotePath) {
-    return this.execute('dir', remotePath.replace(singleSlash, '\\'), __dirname);
+    return this.execute('dir', remotePath.replace(singleSlash, '\\'), '');
   }
 
   async fileExists(remotePath) {

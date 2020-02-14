@@ -66,9 +66,9 @@ class SambaClient {
     return this.execute('dir', remotePath.replace(singleSlash, '\\'), cwd !== null && cwd !== undefined ? cwd : __dirname);
   }
 
-  async fileExists(remotePath) {
+  async fileExists(remotePath, cwd) {
     try {
-      await this.dir(remotePath);
+      await this.dir(remotePath, cwd);
       return true;
     } catch(e) {
       if (e.message.match(missingFileRegex)) {

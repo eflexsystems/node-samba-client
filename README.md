@@ -26,4 +26,17 @@ await client.sendFile('somePath/file', 'destinationFolder/name');
 
 // get a file
 await client.getFile('someRemotePath/file', 'destinationFolder/name');
+
+// create a folder
+await client.mkdir('folder/tree', (optional) 'current/working/directory');
+// By default CWD is __dirname
+
+// executes dir command in remote directory
+await client.dir('remote/folder', (optional) 'current/working/directory');
+// By default CWD is __dirname
 ```
+
+Troubleshooting 
+-------------
+### Error: spawn ENOTDIR in Electron
+Pass an empty string in the Current Working Directory parameter, for more information see [this PR](https://github.com/eflexsystems/node-samba-client/pull/20).

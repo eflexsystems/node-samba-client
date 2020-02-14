@@ -34,6 +34,10 @@ await client.mkdir('folder/tree', (optional) 'current/working/directory');
 // executes dir command in remote directory
 await client.dir('remote/folder', (optional) 'current/working/directory');
 // By default CWD is __dirname
+
+// validate if file or folder exists in the remote device
+await client.fileExists('remote/file', (optional) 'current/working/directory');
+// By default CWD is __dirname
 ```
 
 Troubleshooting 

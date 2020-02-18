@@ -21,6 +21,9 @@ class SambaClient {
     this.username = wrap(options.username || 'guest');
     this.password = options.password ? wrap(options.password) : null;
     this.domain = options.domain;
+    // Possible values for protocol version are listed in the Samba man pages:
+    // https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html#CLIENTMAXPROTOCOL
+    this.maxProtocol = options.maxProtocol;
   }
 
   getFile(path, destination) {
@@ -95,6 +98,10 @@ class SambaClient {
     if (this.domain) {
       args.push('-W');
       args.push(this.domain);
+    }
+
+    if (this.maxProtocol) {
+      args.push('--max-protocol', this.maxProtocol);
     }
 
     return args;

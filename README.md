@@ -19,6 +19,7 @@ let client = new SambaClient({
   username: 'test', // not required, defaults to guest
   password: 'test', // not required
   domain: 'WORKGROUP' // not required
+  maxProtocol: 'SMB3' // not required
 });
 
 // send a file

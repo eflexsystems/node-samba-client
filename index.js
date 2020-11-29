@@ -26,12 +26,17 @@ class SambaClient {
     this.maxProtocol = options.maxProtocol;
   }
 
-  getFile(path, destination) {
-    return this.runCommand('get', path, destination);
+  getFile(path, destination, workingDir) {
+    let fileName = path.replace(singleSlash, '\\');
+    let cmdArgs = util.format('%s %s', fileName, destination);
+    return this.execute('get', cmdArgs, workingDir);
   }
 
   sendFile(path, destination) {
-    return this.runCommand('put', path, destination.replace(singleSlash, '\\'));
+    let workingDir = p.dirname(path);
+    let fileName = p.basename(path).replace(singleSlash, '\\');
+    let cmdArgs = util.format('%s %s', fileName, destination.replace(singleSlash, '\\'));
+    return this.execute('put', cmdArgs, workingDir);
   }
 
   deleteFile(fileName) {
@@ -112,7 +117,7 @@ class SambaClient {
     let command = ['smbclient', this.getSmbClientArgs(fullCmd).join(' ')].join(' ');
 
     let options = {
-      cwd: workingDir
+      cwd: (workingDir ? workingDir : '')
     };
 
     return new Promise((resolve, reject) => {
@@ -127,14 +132,6 @@ class SambaClient {
         return resolve(allOutput);
       });
     });
-  }
-
-  runCommand(cmd, path, destination) {
-    let workingDir = p.dirname(path);
-    let fileName = p.basename(path).replace(singleSlash, '\\');
-    let cmdArgs = util.format('%s %s', fileName, destination);
-
-    return this.execute(cmd, cmdArgs, workingDir);
   }
 
   getAllShares() {

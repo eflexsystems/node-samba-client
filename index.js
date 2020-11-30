@@ -87,6 +87,15 @@ class SambaClient {
     }
   }
 
+  async cwd(){
+    try{
+      const cd = await this.execute('cd','','');
+      return cd.match(/\s.{2}\s(.+?)/)[1];
+    }catch(e){
+      throw e;
+    }
+  }
+
   getSmbClientArgs(fullCmd) {
     let args = ['-U', this.username];
 

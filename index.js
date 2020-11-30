@@ -86,7 +86,33 @@ class SambaClient {
       }
     }
   }
+  
+  async cwd(){
+    try{
+      const cd = await this.execute('cd','','');
+      return cd.match(/\s.{2}\s(.+?)/)[1];
+    }catch(e){
+      throw e;
+    }
+  }
 
+  async list(remotePath){
+    const remoteDirList = [];
+    try{
+      const remoteDirContents = await this.dir(remotePath);
+      for(const content of remoteDirContents.matchAll(/\s?(.+)\s{2}/g)){
+        remoteDirList.push({
+          name: content[1].match(/\s?(.*?)\s/)[1],
+          type: content[1].match(/(.)\s+[0-9]/)[1],
+          size: content[1].match(/.\s+([0-9]+)/)[1],
+          modifyTime: content[1].match(/[0-9]+\s+(.+)/)[1]
+        });
+      }
+      return remoteDirList;
+    }catch(e){
+      throw e;
+    }
+  }
   getSmbClientArgs(fullCmd) {
     let args = ['-U', this.username];
 

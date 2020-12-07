@@ -1,16 +1,14 @@
-node-samba-client
-=================
+# node-samba-client
 
 Node.js wrapper for smbclient
 
+## Requirements
 
-Requirements
-------------
 Requires Node.js 10+
 Smbclient must be installed. This can be installed on Ubuntu with `sudo apt-get install smbclient`.
 
-API
--------------
+## API
+
 ```javascript
 const SambaClient = require('samba-client');
 
@@ -41,7 +39,8 @@ await client.fileExists('remote/file', (optional) 'current/working/directory');
 // By default CWD is __dirname
 ```
 
-Troubleshooting 
--------------
+## Troubleshooting
+
 ### Error: spawn ENOTDIR in Electron
+
 Pass an empty string in the Current Working Directory parameter, for more information see [this PR](https://github.com/eflexsystems/node-samba-client/pull/20).

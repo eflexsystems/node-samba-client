@@ -25,6 +25,7 @@ class SambaClient {
     // Possible values for protocol version are listed in the Samba man pages:
     // https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html#CLIENTMAXPROTOCOL
     this.maxProtocol = options.maxProtocol;
+    this.maskCmd = Boolean(options.maskCmd);
   }
 
   getFile(path, destination, workingDir) {
@@ -145,7 +146,7 @@ class SambaClient {
     }
 
     if (this.port) {
-      args.push('-p');
+      args.push("-p");
       args.push(this.port);
     }
 
@@ -162,13 +163,17 @@ class SambaClient {
     const options = {
       cwd: workingDir || "",
     };
+    const maskCmd = this.maskCmd;
 
     return new Promise((resolve, reject) => {
       exec(command, options, function (err, stdout, stderr) {
         const allOutput = stdout + stderr;
 
         if (err) {
-          err.message += allOutput;
+          // The error message by default contains the whole smbclient command that was run
+          // This contains the username, password in plain text which can be a security risk
+          // maskCmd option allows user to hide the command from the error message
+          err.message = maskCmd ? allOutput : err.message + allOutput;
           return reject(err);
         }
 
@@ -178,12 +183,13 @@ class SambaClient {
   }
 
   getAllShares() {
+    const maskCmd = this.maskCmd;
     return new Promise((resolve, reject) => {
       exec("smbtree -U guest -N", {}, function (err, stdout, stderr) {
         const allOutput = stdout + stderr;
 
         if (err !== null) {
-          err.message += allOutput;
+          err.message = maskCmd ? allOutput : err.message + allOutput;
           return reject(err);
         }
 

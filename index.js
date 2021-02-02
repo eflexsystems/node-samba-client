@@ -112,12 +112,12 @@ class SambaClient {
   async list(remotePath) {
     const remoteDirList = [];
     const remoteDirContents = await this.dir(remotePath);
-    for (const content of remoteDirContents.matchAll(/\s?(.+)\s{2}/g)) {
+    for(const content of remoteDirContents.matchAll(/\s*(.+?)\s{6,}(.)\s+([0-9]+)\s{2}(.+)/g)){
       remoteDirList.push({
-        name: content[1].match(/\s?(.*?)\s/)[1],
-        type: content[1].match(/(.)\s+[0-9]/)[1],
-        size: content[1].match(/.\s+([0-9]+)/)[1],
-        modifyTime: content[1].match(/[0-9]+\s+(.+)/)[1],
+        name: content[1],
+        type: content[2],
+        size: parseInt(content[3]),
+        modifyTime: new Date(content[4]+'Z'),
       });
     }
     return remoteDirList;

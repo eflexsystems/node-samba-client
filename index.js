@@ -1,6 +1,6 @@
 "use strict";
 
-const exec = require("child_process").exec;
+const execa = require("execa");
 const util = require("util");
 const p = require("path");
 
@@ -28,13 +28,13 @@ class SambaClient {
     this.maskCmd = Boolean(options.maskCmd);
   }
 
-  getFile(path, destination, workingDir) {
+  async getFile(path, destination, workingDir) {
     const fileName = path.replace(singleSlash, "\\");
     const cmdArgs = util.format("%s %s", fileName, destination);
-    return this.execute("get", cmdArgs, workingDir);
+    return await this.execute("get", cmdArgs, workingDir);
   }
 
-  sendFile(path, destination) {
+  async sendFile(path, destination) {
     const workingDir = p.dirname(path);
     const fileName = p.basename(path).replace(singleSlash, "\\");
     const cmdArgs = util.format(
@@ -42,11 +42,11 @@ class SambaClient {
       fileName,
       destination.replace(singleSlash, "\\")
     );
-    return this.execute("put", cmdArgs, workingDir);
+    return await this.execute("put", cmdArgs, workingDir);
   }
 
-  deleteFile(fileName) {
-    return this.execute("del", fileName, "");
+  async deleteFile(fileName) {
+    return await this.execute("del", fileName, "");
   }
 
   async listFiles(fileNamePrefix, fileNameSuffix) {
@@ -75,16 +75,16 @@ class SambaClient {
     }
   }
 
-  mkdir(remotePath, cwd) {
-    return this.execute(
+  async mkdir(remotePath, cwd) {
+    return await this.execute(
       "mkdir",
       remotePath.replace(singleSlash, "\\"),
       cwd !== null && cwd !== undefined ? cwd : __dirname
     );
   }
 
-  dir(remotePath, cwd) {
-    return this.execute(
+  async dir(remotePath, cwd) {
+    return await this.execute(
       "dir",
       remotePath.replace(singleSlash, "\\"),
       cwd !== null && cwd !== undefined ? cwd : __dirname
@@ -112,12 +112,14 @@ class SambaClient {
   async list(remotePath) {
     const remoteDirList = [];
     const remoteDirContents = await this.dir(remotePath);
-    for(const content of remoteDirContents.matchAll(/\s*(.+?)\s{6,}(.)\s+([0-9]+)\s{2}(.+)/g)){
+    for (const content of remoteDirContents.matchAll(
+      /\s*(.+?)\s{6,}(.)\s+([0-9]+)\s{2}(.+)/g
+    )) {
       remoteDirList.push({
         name: content[1],
         type: content[2],
         size: parseInt(content[3]),
-        modifyTime: new Date(content[4]+'Z'),
+        modifyTime: new Date(content[4] + "Z"),
       });
     }
     return remoteDirList;
@@ -153,57 +155,51 @@ class SambaClient {
     return args;
   }
 
-  execute(cmd, cmdArgs, workingDir) {
-    const fullCmd = wrap(util.format("%s %s", cmd, cmdArgs));
-    const command = [
-      "smbclient",
-      this.getSmbClientArgs(fullCmd).join(" "),
-    ].join(" ");
+  async execute(smbCommand, smbCommandArgs, workingDir) {
+    const fullSmbCommand = wrap(
+      util.format("%s %s", smbCommand, smbCommandArgs)
+    );
+    const args = this.getSmbClientArgs(fullSmbCommand);
 
     const options = {
+      all: true,
       cwd: workingDir || "",
     };
-    const maskCmd = this.maskCmd;
 
-    return new Promise((resolve, reject) => {
-      exec(command, options, function (err, stdout, stderr) {
-        const allOutput = stdout + stderr;
-
-        if (err) {
-          // The error message by default contains the whole smbclient command that was run
-          // This contains the username, password in plain text which can be a security risk
-          // maskCmd option allows user to hide the command from the error message
-          err.message = maskCmd ? allOutput : err.message + allOutput;
-          return reject(err);
-        }
-
-        return resolve(allOutput);
-      });
-    });
+    try {
+      const { all } = await execa("smbclient", args, options);
+      return all;
+    } catch (error) {
+      if (this.maskCmd) {
+        error.message = error.all;
+        error.shortMessage = error.all;
+      }
+      throw error;
+    }
   }
 
-  getAllShares() {
-    const maskCmd = this.maskCmd;
-    return new Promise((resolve, reject) => {
-      exec("smbtree -U guest -N", {}, function (err, stdout, stderr) {
-        const allOutput = stdout + stderr;
-
-        if (err !== null) {
-          err.message = maskCmd ? allOutput : err.message + allOutput;
-          return reject(err);
-        }
-
-        const shares = [];
-        for (const line in stdout.split(/\r?\n/)) {
-          const words = line.split(/\t/);
-          if (words.length > 2 && words[2].match(/^\s*$/) !== null) {
-            shares.append(words[2].trim());
-          }
-        }
-
-        return resolve(shares);
+  async getAllShares() {
+    try {
+      const { stdout } = await execa("smbtree", ["-U", "guest", "-N"], {
+        all: true,
       });
-    });
+
+      const shares = [];
+      for (const line in stdout.split(/\r?\n/)) {
+        const words = line.split(/\t/);
+        if (words.length > 2 && words[2].match(/^\s*$/) !== null) {
+          shares.append(words[2].trim());
+        }
+      }
+
+      return shares;
+    } catch (error) {
+      if (this.maskCmd) {
+        error.message = error.all;
+        error.shortMessage = error.all;
+      }
+      throw error;
+    }
   }
 }
 

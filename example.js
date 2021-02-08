@@ -6,20 +6,16 @@ const SambaClient = require("./");
 const testFile = "test.txt";
 
 const client = new SambaClient({
-  address: process.argv[2],
-  username: "Guest",
+  address: process.argv[2]
 });
 
 async function run() {
   await fs.writeFile(testFile, testFile);
 
-  await client.mkdir("test-directory");
-  console.log(`created test directory on samba share at ${client.address}`);
-
   const list = await client.listFiles("eflex", ".txt");
   console.log(`found these files: ${list}`);
 
-  await client.mkdir("test-directory");
+  await client.mkdir("test directory");
   console.log(`created test directory on samba share at ${client.address}`);
 
   await client.sendFile(testFile, testFile);
@@ -37,9 +33,5 @@ async function run() {
     console.log(`test file does not exist on samba share at ${client.address}`);
   }
 }
-
-process.on("exit", function () {
-  fs.unlinkSync(testFile);
-});
 
 run();

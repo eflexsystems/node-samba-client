@@ -11,15 +11,11 @@ const singleSlash = /\//g;
  */
 const missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
 
-function wrap(str) {
-  return "'" + str + "'";
-}
-
 class SambaClient {
   constructor(options) {
     this.address = options.address;
-    this.username = wrap(options.username || "guest");
-    this.password = options.password ? wrap(options.password) : null;
+    this.username = options.username;
+    this.password = options.password;
     this.domain = options.domain;
     this.port = options.port;
     // Possible values for protocol version are listed in the Samba man pages:
@@ -78,7 +74,7 @@ class SambaClient {
   async mkdir(remotePath, cwd) {
     return await this.execute(
       "mkdir",
-      remotePath.replace(singleSlash, "\\"),
+      '"' + remotePath.replace(singleSlash, "\\") + '"',
       cwd !== null && cwd !== undefined ? cwd : __dirname
     );
   }
@@ -126,7 +122,11 @@ class SambaClient {
   }
 
   getSmbClientArgs(fullCmd) {
-    const args = ["-U", this.username];
+    const args = [];
+
+    if (this.username) {
+      args.push("-U", this.username);
+    }
 
     if (!this.password) {
       args.push("-N");
@@ -156,9 +156,7 @@ class SambaClient {
   }
 
   async execute(smbCommand, smbCommandArgs, workingDir) {
-    const fullSmbCommand = wrap(
-      util.format("%s %s", smbCommand, smbCommandArgs)
-    );
+    const fullSmbCommand = util.format("%s %s", smbCommand, smbCommandArgs);
     const args = this.getSmbClientArgs(fullSmbCommand);
 
     const options = {

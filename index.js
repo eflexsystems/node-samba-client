@@ -10,15 +10,11 @@ const singleSlash = /\//g;
  */
 const missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
 
-function wrap(str) {
-  return "'" + str + "'";
-}
-
 class SambaClient {
   constructor(options) {
     this.address = options.address;
-    this.username = wrap(options.username || "guest");
-    this.password = options.password ? wrap(options.password) : null;
+    this.username = options.username || "guest";
+    this.password = options.password;
     this.domain = options.domain;
     this.port = options.port;
     // Possible values for protocol version are listed in the Samba man pages:
@@ -30,7 +26,7 @@ class SambaClient {
   async getFile(path, destination, workingDir) {
     const fileName = path.replace(singleSlash, "\\");
     const cleanedDestination = destination.replace(singleSlash, "\\");
-    const cmdArgs = `'${fileName}' '${cleanedDestination}'`;
+    const cmdArgs = `"${fileName}" "${cleanedDestination}"`;
     return await this.execute("get", cmdArgs, workingDir);
   }
 
@@ -38,12 +34,13 @@ class SambaClient {
     const workingDir = p.dirname(path);
     const fileName = p.basename(path).replace(singleSlash, "\\");
     const cleanedDestination = destination.replace(singleSlash, "\\");
-    const cmdArgs = `'${fileName}' '${cleanedDestination}'`;
+    const cmdArgs = `"${fileName}" "${cleanedDestination}"`;
     return await this.execute("put", cmdArgs, workingDir);
   }
 
   async deleteFile(fileName) {
-    return await this.execute("del", `'${fileName}'`, "");
+    const cleanedFileName = fileName.replace(singleSlash, "\\");
+    return await this.execute("del", `"${cleanedFileName}"`, "");
   }
 
   async listFiles(fileNamePrefix, fileNameSuffix) {
@@ -75,14 +72,14 @@ class SambaClient {
     const cleanedRemotePath = remotePath.replace(singleSlash, "\\");
     return await this.execute(
       "mkdir",
-      `${cleanedRemotePath}`,
+      `"${cleanedRemotePath}"`,
       cwd || __dirname
     );
   }
 
   async dir(remotePath, cwd) {
     const cleanedRemotePath = remotePath.replace(singleSlash, "\\");
-    return await this.execute("dir", `${cleanedRemotePath}`, cwd || __dirname);
+    return await this.execute("dir", `"${cleanedRemotePath}"`, cwd || __dirname);
   }
 
   async fileExists(remotePath, cwd) {

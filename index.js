@@ -1,7 +1,6 @@
 "use strict";
 
 const execa = require("execa");
-const util = require("util");
 const p = require("path");
 
 const singleSlash = /\//g;
@@ -30,29 +29,30 @@ class SambaClient {
 
   async getFile(path, destination, workingDir) {
     const fileName = path.replace(singleSlash, "\\");
-    const cmdArgs = `'${fileName}' '${destination}'`;
+    const cleanedDestination = destination.replace(singleSlash, "\\");
+    const cmdArgs = `'${fileName}' '${cleanedDestination}'`;
     return await this.execute("get", cmdArgs, workingDir);
   }
 
   async sendFile(path, destination) {
     const workingDir = p.dirname(path);
     const fileName = p.basename(path).replace(singleSlash, "\\");
-    const cmdArgs = `'${fileName}' '${destination.replace(singleSlash, "\\")}'`;
+    const cleanedDestination = destination.replace(singleSlash, "\\");
+    const cmdArgs = `'${fileName}' '${cleanedDestination}'`;
     return await this.execute("put", cmdArgs, workingDir);
   }
 
   async deleteFile(fileName) {
-    return await this.execute("del", fileName, "");
+    return await this.execute("del", `'${fileName}'`, "");
   }
 
   async listFiles(fileNamePrefix, fileNameSuffix) {
     try {
-      const cmdArgs = util.format("%s*%s", fileNamePrefix, fileNameSuffix);
+      const cmdArgs = `${fileNamePrefix}*${fileNameSuffix}`;
       const allOutput = await this.execute("dir", cmdArgs, "");
       const fileList = [];
-      const lines = allOutput.split("\n");
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].toString().trim();
+      for (let line of allOutput.split("\n")) {
+        line = line.toString().trim();
         if (line.startsWith(fileNamePrefix)) {
           const parsed = line.substring(
             0,
@@ -72,19 +72,17 @@ class SambaClient {
   }
 
   async mkdir(remotePath, cwd) {
+    const cleanedRemotePath = remotePath.replace(singleSlash, "\\");
     return await this.execute(
       "mkdir",
-      '"' + remotePath.replace(singleSlash, "\\") + '"',
-      cwd !== null && cwd !== undefined ? cwd : __dirname
+      `${cleanedRemotePath}`,
+      cwd || __dirname
     );
   }
 
   async dir(remotePath, cwd) {
-    return await this.execute(
-      "dir",
-      remotePath.replace(singleSlash, "\\"),
-      cwd !== null && cwd !== undefined ? cwd : __dirname
-    );
+    const cleanedRemotePath = remotePath.replace(singleSlash, "\\");
+    return await this.execute("dir", `${cleanedRemotePath}`, cwd || __dirname);
   }
 
   async fileExists(remotePath, cwd) {
@@ -156,7 +154,7 @@ class SambaClient {
   }
 
   async execute(smbCommand, smbCommandArgs, workingDir) {
-    const fullSmbCommand = util.format("%s %s", smbCommand, smbCommandArgs);
+    const fullSmbCommand = `${smbCommand} ${smbCommandArgs}`;
     const args = this.getSmbClientArgs(fullSmbCommand);
 
     const options = {

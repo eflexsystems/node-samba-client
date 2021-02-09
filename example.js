@@ -6,7 +6,7 @@ const SambaClient = require("./");
 const testFile = "test.txt";
 
 const client = new SambaClient({
-  address: process.argv[2]
+  address: process.argv[2],
 });
 
 async function run() {

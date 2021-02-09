@@ -11,11 +11,15 @@ const singleSlash = /\//g;
  */
 const missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
 
+function wrap(str) {
+  return "'" + str + "'";
+}
+
 class SambaClient {
   constructor(options) {
     this.address = options.address;
-    this.username = options.username;
-    this.password = options.password;
+    this.username = wrap(options.username || "guest");
+    this.password = options.password ? wrap(options.password) : null;
     this.domain = options.domain;
     this.port = options.port;
     // Possible values for protocol version are listed in the Samba man pages:
@@ -26,18 +30,14 @@ class SambaClient {
 
   async getFile(path, destination, workingDir) {
     const fileName = path.replace(singleSlash, "\\");
-    const cmdArgs = util.format("%s %s", fileName, destination);
+    const cmdArgs = `'${fileName}' '${destination}'`;
     return await this.execute("get", cmdArgs, workingDir);
   }
 
   async sendFile(path, destination) {
     const workingDir = p.dirname(path);
     const fileName = p.basename(path).replace(singleSlash, "\\");
-    const cmdArgs = util.format(
-      "%s %s",
-      fileName,
-      destination.replace(singleSlash, "\\")
-    );
+    const cmdArgs = `'${fileName}' '${destination.replace(singleSlash, "\\")}'`;
     return await this.execute("put", cmdArgs, workingDir);
   }
 

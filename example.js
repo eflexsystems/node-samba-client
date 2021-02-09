@@ -32,6 +32,8 @@ async function run() {
   } else {
     console.log(`test file does not exist on samba share at ${client.address}`);
   }
+
+  await fs.unlink(testFile);
 }
 
 run();

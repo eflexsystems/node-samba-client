@@ -10,6 +10,9 @@ const singleSlash = /\//g;
  */
 const missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
 
+const getCleanedSmbClientArgs = (args) =>
+  args.map((arg) => `"${arg.replace(singleSlash, "\\")}"`).join(" ");
+
 class SambaClient {
   constructor(options) {
     this.address = options.address;
@@ -24,23 +27,20 @@ class SambaClient {
   }
 
   async getFile(path, destination, workingDir) {
-    const fileName = path.replace(singleSlash, "\\");
-    const cleanedDestination = destination.replace(singleSlash, "\\");
-    const cmdArgs = `"${fileName}" "${cleanedDestination}"`;
-    return await this.execute("get", cmdArgs, workingDir);
+    return await this.execute("get", [path, destination], workingDir);
   }
 
   async sendFile(path, destination) {
     const workingDir = p.dirname(path);
-    const fileName = p.basename(path).replace(singleSlash, "\\");
-    const cleanedDestination = destination.replace(singleSlash, "\\");
-    const cmdArgs = `"${fileName}" "${cleanedDestination}"`;
-    return await this.execute("put", cmdArgs, workingDir);
+    return await this.execute(
+      "put",
+      [p.basename(path), destination],
+      workingDir
+    );
   }
 
   async deleteFile(fileName) {
-    const cleanedFileName = fileName.replace(singleSlash, "\\");
-    return await this.execute("del", `"${cleanedFileName}"`, "");
+    return await this.execute("del", [fileName], "");
   }
 
   async listFiles(fileNamePrefix, fileNameSuffix) {
@@ -69,17 +69,11 @@ class SambaClient {
   }
 
   async mkdir(remotePath, cwd) {
-    const cleanedRemotePath = remotePath.replace(singleSlash, "\\");
-    return await this.execute(
-      "mkdir",
-      `"${cleanedRemotePath}"`,
-      cwd || __dirname
-    );
+    return await this.execute("mkdir", [remotePath], cwd || __dirname);
   }
 
   async dir(remotePath, cwd) {
-    const cleanedRemotePath = remotePath.replace(singleSlash, "\\");
-    return await this.execute("dir", `"${cleanedRemotePath}"`, cwd || __dirname);
+    return await this.execute("dir", [remotePath], cwd || __dirname);
   }
 
   async fileExists(remotePath, cwd) {
@@ -116,7 +110,7 @@ class SambaClient {
     return remoteDirList;
   }
 
-  getSmbClientArgs(fullCmd) {
+  getSmbClientArgs(smbCommand, smbCommandArgs) {
     const args = [];
 
     if (this.username) {
@@ -127,7 +121,11 @@ class SambaClient {
       args.push("-N");
     }
 
-    args.push("-c", fullCmd, this.address);
+    let cleanedSmbArgs = smbCommandArgs;
+    if (Array.isArray(smbCommandArgs)) {
+      cleanedSmbArgs = getCleanedSmbClientArgs(smbCommandArgs);
+    }
+    args.push("-c", `${smbCommand} ${cleanedSmbArgs}`, this.address);
 
     if (this.password) {
       args.push(this.password);
@@ -151,8 +149,7 @@ class SambaClient {
   }
 
   async execute(smbCommand, smbCommandArgs, workingDir) {
-    const fullSmbCommand = `${smbCommand} ${smbCommandArgs}`;
-    const args = this.getSmbClientArgs(fullSmbCommand);
+    const args = this.getSmbClientArgs(smbCommand, smbCommandArgs);
 
     const options = {
       all: true,

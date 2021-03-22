@@ -39,8 +39,8 @@ class SambaClient {
     );
   }
   
-   async renameFile(path, destination, workingDir) {
-    return await this.execute("rename", [path, destination], workingDir);
+  async renameFile(path, destination, workingDir) {
+    return await this.execute("rename", [p.basename(path), p.basename(destination)], p.dirname(workingDir));
   }
 
   async deleteFile(fileName) {

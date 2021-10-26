@@ -20,6 +20,7 @@ class SambaClient {
     this.password = options.password;
     this.domain = options.domain;
     this.port = options.port;
+    this.timeout = options.timeout;
     // Possible values for protocol version are listed in the Samba man pages:
     // https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html#CLIENTMAXPROTOCOL
     this.maxProtocol = options.maxProtocol;
@@ -143,6 +144,11 @@ class SambaClient {
     if (this.port) {
       args.push("-p");
       args.push(this.port);
+    }
+
+    if (this.timeout) {
+      args.push("-t");
+      args.push(this.timeout);
     }
 
     return args;

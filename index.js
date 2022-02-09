@@ -129,12 +129,11 @@ class SambaClient {
     args.push("-c", `${smbCommand} ${cleanedSmbArgs}`, this.address);
 
     if (this.password) {
-      args.push(this.password);
+      args.push("--password", this.password);
     }
 
     if (this.domain) {
-      args.push("-W");
-      args.push(this.domain);
+      args.push("-W", this.domain);
     }
 
     if (this.maxProtocol) {
@@ -142,13 +141,11 @@ class SambaClient {
     }
 
     if (this.port) {
-      args.push("-p");
-      args.push(this.port);
+      args.push("-p", this.port);
     }
 
     if (this.timeout) {
-      args.push("-t");
-      args.push(this.timeout);
+      args.push("-t", this.timeout);
     }
 
     return args;

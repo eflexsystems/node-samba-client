@@ -1,4 +1,4 @@
-declare module 'samba-client' {
+declare module "samba-client" {
   interface ISambaClientOptions {
     readonly address: string;
     readonly username?: string;
@@ -20,10 +20,17 @@ declare module 'samba-client' {
   class SambaClient {
     constructor(options: ISambaClientOptions);
 
-    getFile: (path: string, destination: string, workingDir?: string) => Promise<string | Buffer>;
+    getFile: (
+      path: string,
+      destination: string,
+      workingDir?: string
+    ) => Promise<string | Buffer>;
     sendFile: (path: string, destination: string) => Promise<string | Buffer>;
     deleteFile: (fileName: string) => Promise<string | Buffer>;
-    listFiles: (fileNamePrefix: string, fileNameSuffix: string) => Promise<string[]>;
+    listFiles: (
+      fileNamePrefix: string,
+      fileNameSuffix: string
+    ) => Promise<string[]>;
     mkdir: (remotePath: string, cwd: string) => Promise<string | Buffer>;
     dir: (remotePath: string, cwd: string) => Promise<string | Buffer>;
     fileExists: (remotePath: string, cwd: string) => Promise<boolean>;
@@ -33,4 +40,3 @@ declare module 'samba-client' {
 
   export = SambaClient;
 }
-

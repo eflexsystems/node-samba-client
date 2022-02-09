@@ -8,7 +8,8 @@ const singleSlash = /\//g;
  * NT_STATUS_NO_SUCH_FILE - when trying to dir a file in a directory that *does* exist
  * NT_STATUS_OBJECT_NAME_NOT_FOUND - when trying to dir a file in a directory that *does not* exist
  */
-const missingFileRegex = /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
+const missingFileRegex =
+  /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
 
 const getCleanedSmbClientArgs = (args) =>
   args.map((arg) => `"${arg.replace(singleSlash, "\\")}"`).join(" ");

@@ -1,3 +1,5 @@
+import type { Buffer } from "buffer";
+
 declare module "samba-client" {
   interface ISambaClientOptions {
     readonly address: string;
@@ -31,11 +33,17 @@ declare module "samba-client" {
       fileNamePrefix: string,
       fileNameSuffix: string
     ) => Promise<string[]>;
-    mkdir: (remotePath: string, cwd: string) => Promise<string | Buffer>;
-    dir: (remotePath: string, cwd: string) => Promise<string | Buffer>;
-    fileExists: (remotePath: string, cwd: string) => Promise<boolean>;
+    mkdir: (remotePath: string, cwd?: string) => Promise<string | Buffer>;
+    dir: (remotePath: string, cwd?: string) => Promise<string | Buffer>;
+    fileExists: (remotePath: string, cwd?: string) => Promise<boolean>;
     cwd: () => Promise<string>;
     list: (remotePath: string) => Promise<ISambaItem[]>;
+    execute: (
+      smbCommand: string,
+      smbCommandArgs: string | string[],
+      workingDir?: string
+    ) => Promise<string | Buffer>;
+    getAllShares: () => Promise<string[]>;
   }
 
   export = SambaClient;

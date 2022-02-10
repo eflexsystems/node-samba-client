@@ -1,6 +1,6 @@
 {
   "name": "samba-client",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "wrapper for smbclient",
   "main": "index.js",
   "types": "index.d.ts",

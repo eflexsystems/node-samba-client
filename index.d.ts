@@ -1,5 +1,3 @@
-import type { Buffer } from "buffer";
-
 declare module "samba-client" {
   interface ISambaClientOptions {
     readonly address: string;

@@ -71,11 +71,11 @@ class SambaClient {
   }
 
   async mkdir(remotePath, cwd) {
-    return await this.execute("mkdir", [remotePath], cwd || __dirname);
+    return await this.execute("mkdir", [remotePath], cwd);
   }
 
   async dir(remotePath, cwd) {
-    return await this.execute("dir", [remotePath], cwd || __dirname);
+    return await this.execute("dir", [remotePath], cwd);
   }
 
   async fileExists(remotePath, cwd) {

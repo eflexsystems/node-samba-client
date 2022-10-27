@@ -26,10 +26,10 @@
   },
   "homepage": "https://github.com/eflexsystems/node-samba-client",
   "devDependencies": {
-    "@types/node": "^17.0.17",
+    "@types/node": "^18.11.7",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-config-standard": "^16.0.2",
+    "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",

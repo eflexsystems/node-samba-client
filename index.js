@@ -11,8 +11,13 @@ const singleSlash = /\//g;
 const missingFileRegex =
   /(NT_STATUS_OBJECT_NAME_NOT_FOUND|NT_STATUS_NO_SUCH_FILE)/im;
 
-const getCleanedSmbClientArgs = (args) =>
-  args.map((arg) => `"${arg.replace(singleSlash, "\\")}"`).join(" ");
+const getCleanedSmbClientArgs = (args) => {
+  if (Array.isArray(args)) {
+    return args.map((arg) => `"${arg.replace(singleSlash, "\\")}"`).join(" ");
+  } else {
+    return `"${args.replace(singleSlash, "\\")}"`;
+  }
+}
 
 class SambaClient {
   constructor(options) {
@@ -29,7 +34,7 @@ class SambaClient {
   }
 
   async getFile(path, destination, workingDir) {
-    return await this.execute("get", [path, destination], workingDir);
+    return await this.execute("get", `${getCleanedSmbClientArgs(path)} "${destination}"`, workingDir);
   }
 
   async sendFile(path, destination) {

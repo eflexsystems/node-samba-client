@@ -5,9 +5,9 @@ module.exports = {
     commonjs: true,
     es2021: true,
   },
-  extends: ["standard", "prettier"],
+  extends: ["standard", "prettier", "plugin:n/recommended"],
   parserOptions: {
-    ecmaVersion: 12,
+    ecmaVersion: 2020,
   },
   rules: {},
 };

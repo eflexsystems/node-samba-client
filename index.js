@@ -17,7 +17,7 @@ const getCleanedSmbClientArgs = (args) => {
   } else {
     return `"${args.replace(singleSlash, "\\")}"`;
   }
-}
+};
 
 class SambaClient {
   constructor(options) {
@@ -34,7 +34,11 @@ class SambaClient {
   }
 
   async getFile(path, destination, workingDir) {
-    return await this.execute("get", `${getCleanedSmbClientArgs(path)} "${destination}"`, workingDir);
+    return await this.execute(
+      "get",
+      `${getCleanedSmbClientArgs(path)} "${destination}"`,
+      workingDir
+    );
   }
 
   async sendFile(path, destination) {

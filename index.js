@@ -100,7 +100,7 @@ class SambaClient {
     const remoteDirList = [];
     const remoteDirContents = await this.dir(remotePath);
     for (const content of remoteDirContents.matchAll(
-      /\s*(.+?)\s{6,}(.)\s+([0-9]+)\s{2}(.+)/g
+      /\s*(.+?)\s{6,}([A-Z0-9]{1,2})\s+([0-9]+)\s{2}(.+)/g
     )) {
       remoteDirList.push({
         name: content[1],

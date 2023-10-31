@@ -152,7 +152,11 @@ class SambaClient {
     }
 
     if (this.maxProtocol) {
-      args.push("--max-protocol", this.maxProtocol);
+       if (this.maxProtocol === 'SMB1') {
+          args.push("--option", "client min protocol=NT1");
+       } else {
+          args.push("--max-protocol", this.maxProtocol);
+       }
     }
 
     if (this.port) {
